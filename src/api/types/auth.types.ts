@@ -3,6 +3,15 @@ export interface LoginRequest {
   password: string;
 }
 
+export interface RegisterRequest {
+    Email: string;
+    Password: string;
+    FirstName: string;
+    LastName: string;
+    PhoneCountryCode: string;
+    PhoneNumber: string;
+}
+
 export interface UserResponse {
   id: string;
   email: string;

@@ -1,4 +1,12 @@
+import { useNavigate } from "react-router-dom";
+
 export default function HeroSection() {
+  const navigate = useNavigate();
+
+  const handleGetStarted = () => {
+    navigate("/register");
+  }
+
   return (
     <section className="px-6 pt-12 pb-20 text-center relative overflow-hidden">
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full opacity-5 pointer-events-none">
@@ -20,11 +28,11 @@ export default function HeroSection() {
         </p>
 
         <div className="flex flex-col gap-4">
-          <button className="w-full bg-brown text-white h-14 rounded-2xl text-base font-bold shadow-xl shadow-brown/20 active:scale-95 transition-transform">
+          <button onClick={handleGetStarted} className="cursor-pointer w-full bg-brown text-white h-14 rounded-2xl text-base font-bold shadow-xl shadow-brown/20 active:scale-95 transition-transform">
             Get Started
           </button>
 
-          <button className="w-full bg-white text-brown border border-brown/10 h-14 rounded-2xl text-base font-bold hover:bg-milk-darker transition-colors">
+          <button className="cursor-pointer w-full bg-white text-brown border border-brown/10 h-14 rounded-2xl text-base font-bold hover:bg-milk-darker transition-colors">
             View Demo
           </button>
         </div>
