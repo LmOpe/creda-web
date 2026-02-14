@@ -85,7 +85,7 @@ const transactions = [
 ];
 
 export default function HomePage() {
-  const [showBalance, setShowBalance] = useState(true);
+  const [showBalance, setShowBalance] = useState(false);
 
   return (
     <div className="space-y-6 pb-24">
