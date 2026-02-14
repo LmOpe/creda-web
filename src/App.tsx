@@ -1,10 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import LandingPage from "./pages/landing/LandingPage";
 import LoginPage from "./pages/auth/LoginPage";
-
-function RegisterPage() {
-  return <div className="p-6">Register Page</div>;
-}
+import RegisterPage from "./pages/auth/RegisterPage";
 
 export default function App() {
   return (
