@@ -26,23 +26,35 @@ export default function RegisterPage() {
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
   ) => {
     setForm((prev) => ({
       ...prev,
       [e.target.name]: e.target.value,
     }));
 
-    // Clear field error when typing
     setFieldErrors((prev) => ({
       ...prev,
       [e.target.name]: "",
     }));
   };
 
-  const handleSubmit = async (
-    e: React.FormEvent<HTMLFormElement>
-  ) => {
+  const isEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.Email);
+  const isPasswordValid =
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(
+      form.Password,
+    );
+
+  const isFormValid =
+    form.FirstName.trim() !== "" &&
+    form.LastName.trim() !== "" &&
+    isEmailValid &&
+    form.PhoneNumber.trim() !== "" &&
+    isPasswordValid &&
+    agreeTerms &&
+    !loading;
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     setGlobalError(null);
@@ -65,42 +77,26 @@ export default function RegisterPage() {
 
       const { userResponse, userProfileResponse } = response.data;
 
-      // ✅ Auto-authenticate on successful registration
       setAuth(userResponse, userProfileResponse);
 
       navigate("/app");
     } catch (err: any) {
-      // -----------------------------
-      // 400 VALIDATION
-      // -----------------------------
       if (err.status === 400 && err.errors) {
         const errors: Record<string, string> = {};
 
-        Object.entries(err.errors).forEach(
-          ([key, value]: any) => {
-            errors[key] = value[0];
-          }
-        );
+        Object.entries(err.errors).forEach(([key, value]: any) => {
+          errors[key] = value[0];
+        });
 
         setFieldErrors(errors);
         setGlobalError("Please correct the highlighted fields.");
-      }
-
-      // -----------------------------
-      // 409 EMAIL EXISTS
-      // -----------------------------
-      else if (err.status === 409) {
+      } else if (err.status === 409) {
         setFieldErrors({
           Email: err.detail || "Email already exists.",
         });
-      }
-
-      // -----------------------------
-      // UNKNOWN
-      // -----------------------------
-      else {
+      } else {
         setGlobalError(
-          err.message || "Something went wrong. Please try again."
+          err.message || "Something went wrong. Please try again.",
         );
       }
     } finally {
@@ -172,9 +168,7 @@ export default function RegisterPage() {
               className="w-full h-12 px-4 rounded-xl bg-milk/50 border border-border-soft focus:ring-2 focus:ring-brown outline-none"
             />
             {fieldErrors.Email && (
-              <p className="text-xs text-danger mt-1">
-                {fieldErrors.Email}
-              </p>
+              <p className="text-xs text-danger mt-1">{fieldErrors.Email}</p>
             )}
           </div>
 
@@ -221,23 +215,17 @@ export default function RegisterPage() {
 
               <button
                 type="button"
-                onClick={() =>
-                  setShowPassword((prev) => !prev)
-                }
+                onClick={() => setShowPassword((prev) => !prev)}
                 className="absolute right-4 top-1/2 -translate-y-1/2 text-text-muted"
               >
                 <span className="material-symbols-outlined">
-                  {showPassword
-                    ? "visibility_off"
-                    : "visibility"}
+                  {showPassword ? "visibility_off" : "visibility"}
                 </span>
               </button>
             </div>
 
             {fieldErrors.Password && (
-              <p className="text-xs text-danger mt-1">
-                {fieldErrors.Password}
-              </p>
+              <p className="text-xs text-danger mt-1">{fieldErrors.Password}</p>
             )}
           </div>
 
@@ -246,29 +234,29 @@ export default function RegisterPage() {
             <input
               type="checkbox"
               checked={agreeTerms}
-              onChange={() =>
-                setAgreeTerms((prev) => !prev)
-              }
+              onChange={() => setAgreeTerms((prev) => !prev)}
               className="mt-1"
             />
             <p className="text-xs text-text-muted">
-              I agree to the Terms of Service and Privacy
-              Policy.
+              I agree to the Terms of Service and Privacy Policy.
             </p>
           </div>
 
           {/* Global Error */}
           {globalError && (
-            <div className="text-sm text-danger text-center">
-              {globalError}
-            </div>
+            <div className="text-sm text-danger text-center">{globalError}</div>
           )}
 
           {/* Submit */}
           <button
             type="submit"
-            disabled={loading}
-            className="w-full h-14 bg-brown text-white font-bold rounded-xl active:scale-[0.98] transition-all disabled:opacity-60"
+            disabled={!isFormValid}
+            className={`w-full h-14 font-bold rounded-xl transition-all ${
+              isFormValid
+                ? "bg-brown text-white active:scale-[0.98] cursor-pointer"
+                : "bg-brown/10 text-white/70 cursor-not-allowed"
+            }
+                  `}
           >
             {loading ? "Creating account..." : "Create Account"}
           </button>
