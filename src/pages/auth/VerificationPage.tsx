@@ -34,8 +34,8 @@ export default function VerificationPage() {
           if (intent === "PasswordReset") {
             navigate(`/reset-password?code=${code}`);
             return;
-            }
-            
+          }
+
           setTimeout(() => navigate("/login"), 3000);
         } else {
           setStatus("failed");
@@ -71,13 +71,21 @@ export default function VerificationPage() {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-milk">
-      <div className="w-full max-w-md mb-8 flex flex-col items-center">
-        <div className="w-12 h-12 bg-brown rounded-xl flex items-center justify-center mb-4 shadow-lg shadow-brown/20">
-          <span className="material-symbols-outlined text-white text-3xl">
+      <div className="text-center mb-8">
+        <div className="inline-flex items-center justify-center w-14 h-14 bg-brown rounded-2xl mb-4 shadow-lg shadow-brown/20">
+          <span className="material-symbols-outlined text-milk text-3xl">
             account_balance_wallet
           </span>
         </div>
+
+        <h1 className="text-3xl font-extrabold text-text-main tracking-tight">
+          Creda
+        </h1>
+        <p className="text-text-muted mt-2 font-medium">
+          Secure your financial future
+        </p>
       </div>
+
       <div className="w-full max-w-md bg-white rounded-[2rem] shadow-[0_20px_50px_rgba(44,24,16,0.08)] p-8 border border-border-soft text-center">
         {loading && <p className="text-text-muted">Verifying...</p>}
 

@@ -50,6 +50,21 @@ export default function RequestCodePage({ title, description, intent }: Props) {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-milk">
+      <div className="text-center mb-8">
+        <div className="inline-flex items-center justify-center w-14 h-14 bg-brown rounded-2xl mb-4 shadow-lg shadow-brown/20">
+          <span className="material-symbols-outlined text-milk text-3xl">
+            account_balance_wallet
+          </span>
+        </div>
+
+        <h1 className="text-3xl font-extrabold text-text-main tracking-tight">
+          Creda
+        </h1>
+        <p className="text-text-muted mt-2 font-medium">
+          Secure your financial future
+        </p>
+      </div>
+
       <div className="w-full max-w-md bg-white rounded-[2rem] shadow-[0_20px_50px_rgba(44,24,16,0.08)] p-8 border border-border-soft text-center">
         <h1 className="text-2xl font-bold text-text-main mb-4">{title}</h1>
 
