@@ -24,14 +24,13 @@ export default function LoginPage() {
     }));
   };
 
+  const isEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email);
+
+  const isFormValid =
+    isEmailValid && form.password.trim().length > 6 && !loading;
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
-    if (!form.email || !form.password) {
-      setError("Email and password are required.");
-      return;
-    }
-
     setLoading(true);
     setError(null);
 
@@ -148,8 +147,8 @@ export default function LoginPage() {
                   </span>
                 </button>
               </div>
-                      </div>
-                      
+            </div>
+
             {/* Forgot Password */}
             <div className="text-right">
               <button
@@ -171,11 +170,20 @@ export default function LoginPage() {
             {/* Submit Button */}
             <button
               type="submit"
-              disabled={loading}
-              className="w-full h-14 bg-brown hover:bg-brown-light text-white font-bold rounded-2xl shadow-lg shadow-brown/25 transition-all active:scale-[0.98] mt-2 flex items-center justify-center gap-2 disabled:opacity-60"
+              disabled={!isFormValid}
+              className={`
+    w-full h-14 font-bold rounded-2xl mt-2
+    flex items-center justify-center gap-2
+    transition-all
+    ${
+      isFormValid
+        ? "bg-brown hover:bg-brown-light text-white shadow-lg shadow-brown/25 active:scale-[0.98]"
+        : "bg-brown/40 text-white/70 cursor-not-allowed shadow-none"
+    }
+  `}
             >
               {loading ? "Signing in..." : "Sign In"}
-              {!loading && (
+              {!loading && isFormValid && (
                 <span className="material-symbols-outlined text-xl">login</span>
               )}
             </button>
