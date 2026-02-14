@@ -10,8 +10,27 @@ import ResetPasswordPage from "./pages/auth/ResetPasswordPage";
 import AppLayout from "./layouts/AppLayout";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import HomePage from "./pages/app/HoemPage";
+import { useEffect } from "react";
+import { useAuthStore } from "./store/auth.store";
 
 export default function App() {
+  const hydrateAuth = useAuthStore((s) => s.hydrateAuth);
+  const isHydrated = useAuthStore((s) => s.isHydrated);
+
+  useEffect(() => {
+    hydrateAuth();
+  }, []);
+
+  if (!isHydrated) {
+    return (
+      <div className="h-screen flex items-center justify-center bg-milk">
+        <span className="text-brown font-semibold">
+          Loading...
+        </span>
+      </div>
+    );
+  }
+  
   return (
     <BrowserRouter>
       <Routes>

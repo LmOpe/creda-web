@@ -23,4 +23,6 @@ export const authApi = {
 
   resetPassword: (payload: { code: string; newPassword: string }) =>
     apiClient.post("/auth/reset-password", payload),
+
+  getCurrentUser: () => apiClient.get<LoginResponse>("/auth/me"),
 };
