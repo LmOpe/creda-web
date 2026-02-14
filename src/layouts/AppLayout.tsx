@@ -1,68 +1,97 @@
-import { Outlet, useNavigate } from "react-router-dom";
+import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { useAuthStore } from "../store/auth.store";
 
 export default function AppLayout() {
   const profile = useAuthStore((s) => s.profile);
-  const clearAuth = useAuthStore((s) => s.clearAuth);
+  // const clearAuth = useAuthStore((s) => s.clearAuth);
   const navigate = useNavigate();
+  const location = useLocation();
 
-  const handleLogout = () => {
-    clearAuth();
-    navigate("/login");
-  };
+  // const handleLogout = () => {
+  //   clearAuth();
+  //   navigate("/login");
+  // };
+
+  const initials =
+    profile?.firstName?.[0]?.toUpperCase() || "U";
 
   return (
-    <div className="min-h-screen bg-milk pb-24">
+    <div className="min-h-screen bg-milk pb-24 flex flex-col">
+
       {/* HEADER */}
-      <div className="px-5 pt-6 pb-4 sticky top-0 bg-milk/80 backdrop-blur-md z-20">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm text-text-muted">
-              Welcome back
-            </p>
-            <h1 className="text-xl font-extrabold text-text-main">
-              Hi, {profile?.firstName || "User"}
-            </h1>
+      <header className="sticky top-0 z-20 flex items-center justify-between px-5 py-4 bg-white/70 backdrop-blur-md border-b border-brown/5">
+        
+        {/* LOGO */}
+        <div className="flex items-center gap-2">
+          <div className="size-8 rounded-lg bg-brown flex items-center justify-center">
+            <span className="material-symbols-outlined text-white text-lg">
+              account_balance_wallet
+            </span>
           </div>
+          <span className="font-bold uppercase tracking-tight text-brown">
+            Creda
+          </span>
+        </div>
 
-          <div className="flex items-center gap-3">
-            <button className="relative p-2 rounded-full hover:bg-brown/5 transition-colors">
-              <span className="material-symbols-outlined text-text-muted">
-                notifications
-              </span>
-            </button>
+        {/* RIGHT SIDE */}
+        <div className="flex items-center gap-4">
 
-            <button
-              onClick={handleLogout}
-              className="p-2 rounded-full hover:bg-red-50 transition-colors text-red-600"
-            >
-              <span className="material-symbols-outlined">
-                logout
-              </span>
-            </button>
+          <button className="relative p-2 rounded-full hover:bg-brown/5 transition-colors">
+            <span className="material-symbols-outlined text-text-muted">
+              notifications
+            </span>
+            <span className="absolute top-2 right-2 size-2 bg-red-500 rounded-full"></span>
+          </button>
+
+          {/* Placeholder Avatar */}
+          <div className="size-9 rounded-full bg-brown/10 ring-2 ring-brown/20 flex items-center justify-center font-bold text-brown">
+            {initials}
           </div>
         </div>
-      </div>
+      </header>
 
       {/* PAGE CONTENT */}
-      <div className="px-5">
+      <main className="flex-1 px-5 py-6">
         <Outlet />
-      </div>
+      </main>
 
       {/* BOTTOM NAV */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-border-soft px-6 py-3 flex justify-between items-center md:hidden">
-        <NavItem icon="dashboard" label="Home" />
-        <NavItem icon="wallet" label="Wallet" />
-        <div className="-mt-8">
-          <button className="w-14 h-14 bg-brown rounded-full text-white shadow-lg flex items-center justify-center">
-            <span className="material-symbols-outlined text-3xl">
-              add
-            </span>
-          </button>
-        </div>
-        <NavItem icon="grid_view" label="Services" />
-        <NavItem icon="receipt_long" label="History" />
-      </div>
+      <nav className="md:hidden fixed bottom-0 w-full bg-white border-t border-brown/10 px-6 py-3 flex justify-between items-center z-50">
+        <NavItem
+          icon="dashboard"
+          label="Home"
+          active={location.pathname === "/app"}
+          onClick={() => navigate("/app")}
+        />
+
+        <NavItem
+          icon="wallet"
+          label="Wallet"
+          active={location.pathname.includes("wallet")}
+          onClick={() => navigate("/app/wallet")}
+        />
+
+        <NavItem
+          icon="grid_view"
+          label="Services"
+          active={location.pathname.includes("services")}
+          onClick={() => navigate("/app/services")}
+        />
+
+        <NavItem
+          icon="receipt_long"
+          label="History"
+          active={location.pathname.includes("history")}
+          onClick={() => navigate("/app/history")}
+        />
+
+        <NavItem
+          icon="person"
+          label="Profile"
+          active={location.pathname.includes("profile")}
+          onClick={() => navigate("/app/profile")}
+        />
+      </nav>
     </div>
   );
 }
@@ -70,16 +99,27 @@ export default function AppLayout() {
 function NavItem({
   icon,
   label,
+  active,
+  onClick,
 }: {
   icon: string;
   label: string;
+  active?: boolean;
+  onClick?: () => void;
 }) {
   return (
-    <button className="flex flex-col items-center text-text-muted">
+    <button
+      onClick={onClick}
+      className={`flex flex-col items-center gap-1 ${
+        active ? "text-brown" : "text-text-muted"
+      }`}
+    >
       <span className="material-symbols-outlined">
         {icon}
       </span>
-      <span className="text-[10px]">{label}</span>
+      <span className={`text-[10px] ${active ? "font-bold" : ""}`}>
+        {label}
+      </span>
     </button>
   );
 }
