@@ -1,9 +1,73 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { authApi } from "../../api/auth.api";
+import type { LoginRequest } from "../../api/types/auth.types";
+import { useAuthStore } from "../../store/auth.store";
 
 export default function LoginPage() {
   const navigate = useNavigate();
+  const setAuth = useAuthStore((state) => state.setAuth);
+
+  const [form, setForm] = useState<LoginRequest>({
+    email: "",
+    password: "",
+  });
+
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    setForm((prev) => ({
+      ...prev,
+      [e.target.name]: e.target.value,
+    }));
+  };
+
+  const handleSubmit = async (
+    e: React.FormEvent<HTMLFormElement>
+  ) => {
+    e.preventDefault();
+
+    if (!form.email || !form.password) {
+      setError("Email and password are required.");
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await authApi.login(form);
+
+      if (!response.success) {
+        setError(response.message || "Login failed.");
+        return;
+      }
+
+      const { userResponse, userProfileResponse } = response.data;
+
+      // ✅ Set authenticated state immediately from login response
+      setAuth(userResponse, userProfileResponse);
+
+      navigate("/app");
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (err: any) {
+      if (err.status === 401) {
+        setError("Invalid email or password.");
+      } else if (err.status === 400 && err.errors) {
+        const firstError =
+          (Object.values(err.errors)[0] as string[])?.[0];
+        setError(firstError || "Validation error.");
+      } else {
+        setError(err.message || "Something went wrong.");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-milk relative overflow-hidden">
@@ -30,13 +94,13 @@ export default function LoginPage() {
           </p>
         </div>
 
-        {/* Card */}
+        {/* Login Card */}
         <div className="bg-white/80 backdrop-blur-xl border border-white/50 p-8 rounded-[2.5rem] shadow-[0_20px_40px_rgba(74,55,40,0.08)]">
           <h2 className="text-xl font-bold text-text-main mb-6 text-center">
             Welcome back
           </h2>
 
-          <form className="space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-5">
             {/* Email */}
             <div className="space-y-2">
               <label className="text-sm font-semibold text-text-main ml-1">
@@ -49,7 +113,10 @@ export default function LoginPage() {
                 </span>
 
                 <input
+                  name="email"
                   type="email"
+                  value={form.email}
+                  onChange={handleChange}
                   placeholder="name@company.com"
                   className="w-full h-14 pl-12 pr-4 bg-milk/50 ring-1 ring-border-soft focus:ring-2 focus:ring-brown rounded-2xl transition-all outline-none placeholder:text-text-muted/60 text-text-main font-medium"
                 />
@@ -68,60 +135,53 @@ export default function LoginPage() {
                 </span>
 
                 <input
+                  name="password"
                   type={showPassword ? "text" : "password"}
+                  value={form.password}
+                  onChange={handleChange}
                   placeholder="••••••••"
                   className="w-full h-14 pl-12 pr-12 bg-milk/50 ring-1 ring-border-soft focus:ring-2 focus:ring-brown rounded-2xl transition-all outline-none placeholder:text-text-muted/60 text-text-main font-medium"
                 />
 
                 <button
                   type="button"
-                  onClick={() => setShowPassword(!showPassword)}
+                  onClick={() =>
+                    setShowPassword((prev) => !prev)
+                  }
                   className="absolute right-4 top-1/2 -translate-y-1/2 text-text-muted hover:text-brown transition-colors"
                 >
                   <span className="material-symbols-outlined text-xl">
-                    {showPassword ? "visibility_off" : "visibility"}
+                    {showPassword
+                      ? "visibility_off"
+                      : "visibility"}
                   </span>
                 </button>
               </div>
             </div>
 
-            {/* Remember + Forgot */}
-            <div className="flex items-center justify-between px-1 py-1">
-              <label className="flex items-center cursor-pointer group">
-                <input type="checkbox" className="sr-only peer" />
+            {/* Error Display */}
+            {error && (
+              <div className="text-danger text-sm font-medium text-center">
+                {error}
+              </div>
+            )}
 
-                <div className="w-5 h-5 bg-milk border border-border-soft rounded-md peer-checked:bg-brown peer-checked:border-brown transition-all relative">
-                  <span className="material-symbols-outlined absolute text-white text-[14px] opacity-0 peer-checked:opacity-100 left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-                    check
-                  </span>
-                </div>
-
-                <span className="ml-2 text-sm font-medium text-text-muted group-hover:text-text-main transition-colors">
-                  Remember me
-                </span>
-              </label>
-
-              <button
-                type="button"
-                className="text-sm font-bold text-brown hover:opacity-80 underline decoration-brown/20 underline-offset-4"
-              >
-                Forgot password?
-              </button>
-            </div>
-
-            {/* Sign In */}
+            {/* Submit Button */}
             <button
               type="submit"
-              className="w-full h-14 bg-brown hover:bg-brown-light text-white font-bold rounded-2xl shadow-lg shadow-brown/25 transition-all active:scale-[0.98] mt-4 flex items-center justify-center gap-2"
+              disabled={loading}
+              className="w-full h-14 bg-brown hover:bg-brown-light text-white font-bold rounded-2xl shadow-lg shadow-brown/25 transition-all active:scale-[0.98] mt-2 flex items-center justify-center gap-2 disabled:opacity-60"
             >
-              <span>Sign In</span>
-              <span className="material-symbols-outlined text-xl">
-                login
-              </span>
+              {loading ? "Signing in..." : "Sign In"}
+              {!loading && (
+                <span className="material-symbols-outlined text-xl">
+                  login
+                </span>
+              )}
             </button>
           </form>
 
-          {/* Register */}
+          {/* Register Link */}
           <div className="mt-8 text-center">
             <p className="text-sm text-text-muted font-medium">
               New to Creda?{" "}
@@ -132,27 +192,6 @@ export default function LoginPage() {
                 Create account
               </button>
             </p>
-          </div>
-        </div>
-
-        {/* Security Badges */}
-        <div className="mt-12 flex items-center justify-center gap-6 opacity-40">
-          <div className="flex items-center gap-2">
-            <span className="material-symbols-outlined text-sm">
-              verified_user
-            </span>
-            <span className="text-[10px] uppercase tracking-widest font-bold">
-              Encrypted
-            </span>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <span className="material-symbols-outlined text-sm">
-              security
-            </span>
-            <span className="text-[10px] uppercase tracking-widest font-bold">
-              PCI Compliant
-            </span>
           </div>
         </div>
       </div>
