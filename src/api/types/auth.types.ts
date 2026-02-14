@@ -43,3 +43,19 @@ export interface LoginResponse {
   traceId: string;
   statusCode: number;
 }
+
+export type VerifyCodeSuccess = {
+  success: true;
+  message: string;
+  traceId: string;
+  statusCode: number;
+};
+
+export type VerifyCodeError = {
+  type: string;
+  title: string;
+  status: number;
+  message: string;
+};
+
+export type VerificationStatus = "pending" | "success" | "failed";

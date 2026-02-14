@@ -25,10 +25,6 @@ export default function RegisterPage() {
   const [globalError, setGlobalError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
-  // -----------------------------
-  // Handlers
-  // -----------------------------
-
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
