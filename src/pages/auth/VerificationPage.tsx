@@ -26,7 +26,7 @@ export default function VerificationPage() {
         const response = (await authApi.verifyCode({ code, intent })) as any;
 
         // TypeScript knows this is success type
-        const data = response.data as VerifyCodeSuccess;
+        const data = response as VerifyCodeSuccess;
         if (data.success) {
           setStatus("success");
           setMessage(data.message || "Email verified successfully");
@@ -99,7 +99,7 @@ export default function VerificationPage() {
             <h1 className="text-2xl font-bold text-danger mb-4">{message}</h1>
             <div className="flex flex-col gap-4">
               <button
-                onClick={() => alert("Request new verification link")}
+                onClick={() => navigate("/request-verification")}
                 className="w-full h-14 bg-brown text-white font-bold rounded-xl active:scale-[0.98] transition-all"
               >
                 Request New Verification Link

@@ -1,0 +1,84 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { authApi } from "../../api/auth.api";
+
+export default function RequestVerificationPage() {
+  const navigate = useNavigate();
+
+  const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
+  const [fieldError, setFieldError] = useState<string | null>(null);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setMessage(null);
+    setFieldError(null);
+
+    if (!email) {
+      setFieldError("Email is required.");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await authApi.requestCode({ email, intent: "EmailVerification" });
+
+      if (response?.success) {
+        setMessage(response.message);
+      } else {
+        setFieldError("Something went wrong. Please try again.");
+      }
+    } catch (err: any) {
+      if (err.status === 400 && err.errors?.email) {
+        setFieldError(err.errors.email[0]);
+      } else {
+        setFieldError(err.message || "Something went wrong. Please try again.");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-milk">
+      <div className="w-full max-w-md bg-white rounded-[2rem] shadow-[0_20px_50px_rgba(44,24,16,0.08)] p-8 border border-border-soft text-center">
+        <h1 className="text-2xl font-bold text-text-main mb-4">
+          Request Verification Link
+        </h1>
+        <p className="text-text-muted mb-6">
+          Enter your email to receive a new verification link.
+        </p>
+
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          <input
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="w-full h-12 px-4 rounded-xl bg-milk/50 border border-border-soft focus:ring-2 focus:ring-brown outline-none"
+          />
+          {fieldError && <p className="text-xs text-danger">{fieldError}</p>}
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full h-14 bg-brown text-white font-bold rounded-xl active:scale-[0.98] transition-all disabled:opacity-60"
+          >
+            {loading ? "Sending..." : "Send Verification Link"}
+          </button>
+        </form>
+
+        {message && <p className="text-sm text-text-main mt-4">{message}</p>}
+
+        <button
+          onClick={() => navigate("/login")}
+          className="mt-6 text-sm text-brown hover:underline"
+        >
+          Back to Login
+        </button>
+      </div>
+    </div>
+  );
+}
