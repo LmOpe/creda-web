@@ -31,8 +31,12 @@ export default function VerificationPage() {
           setStatus("success");
           setMessage(data.message || "Email verified successfully");
 
-          // Redirect after 5s
-          setTimeout(() => navigate("/login"), 5000);
+          if (intent === "PasswordReset") {
+            navigate(`/reset-password?code=${code}`);
+            return;
+            }
+            
+          setTimeout(() => navigate("/login"), 3000);
         } else {
           setStatus("failed");
           setMessage("Verification failed.");
@@ -83,7 +87,7 @@ export default function VerificationPage() {
               {message}
             </h1>
             <p className="text-text-muted mb-6">
-              Redirecting to login in 5 seconds...
+              Redirecting to login in 3 seconds...
             </p>
             <button
               onClick={() => navigate("/login")}

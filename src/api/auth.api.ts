@@ -20,4 +20,7 @@ export const authApi = {
       "/auth/request-code",
       payload,
     ),
+
+  resetPassword: (payload: { code: string; newPassword: string }) =>
+    apiClient.post("/auth/reset-password", payload),
 };

@@ -17,18 +17,14 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm((prev) => ({
       ...prev,
       [e.target.name]: e.target.value,
     }));
   };
 
-  const handleSubmit = async (
-    e: React.FormEvent<HTMLFormElement>
-  ) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     if (!form.email || !form.password) {
@@ -53,13 +49,12 @@ export default function LoginPage() {
       setAuth(userResponse, userProfileResponse);
 
       navigate("/app");
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       if (err.status === 401) {
         setError("Invalid email or password.");
       } else if (err.status === 400 && err.errors) {
-        const firstError =
-          (Object.values(err.errors)[0] as string[])?.[0];
+        const firstError = (Object.values(err.errors)[0] as string[])?.[0];
         setError(firstError || "Validation error.");
       } else {
         setError(err.message || "Something went wrong.");
@@ -145,18 +140,25 @@ export default function LoginPage() {
 
                 <button
                   type="button"
-                  onClick={() =>
-                    setShowPassword((prev) => !prev)
-                  }
+                  onClick={() => setShowPassword((prev) => !prev)}
                   className="absolute right-4 top-1/2 -translate-y-1/2 text-text-muted hover:text-brown transition-colors"
                 >
                   <span className="material-symbols-outlined text-xl">
-                    {showPassword
-                      ? "visibility_off"
-                      : "visibility"}
+                    {showPassword ? "visibility_off" : "visibility"}
                   </span>
                 </button>
               </div>
+                      </div>
+                      
+            {/* Forgot Password */}
+            <div className="text-right">
+              <button
+                type="button"
+                onClick={() => navigate("/forgot-password")}
+                className="text-sm text-brown font-medium hover:underline"
+              >
+                Forgot password?
+              </button>
             </div>
 
             {/* Error Display */}
@@ -174,9 +176,7 @@ export default function LoginPage() {
             >
               {loading ? "Signing in..." : "Sign In"}
               {!loading && (
-                <span className="material-symbols-outlined text-xl">
-                  login
-                </span>
+                <span className="material-symbols-outlined text-xl">login</span>
               )}
             </button>
           </form>
