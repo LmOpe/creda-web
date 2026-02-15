@@ -9,7 +9,7 @@ import ResetPasswordPage from "./pages/auth/ResetPasswordPage";
 
 import AppLayout from "./layouts/AppLayout";
 import ProtectedRoute from "./routes/ProtectedRoute";
-import HomePage from "./pages/app/HoemPage";
+import HomePage from "./pages/app/HomePage";
 import { useEffect } from "react";
 import { useAuthStore } from "./store/auth.store";
 
@@ -30,7 +30,7 @@ export default function App() {
       </div>
     );
   }
-  
+
   return (
     <BrowserRouter>
       <Routes>

@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { walletApi } from "../../api/wallet.api";
 import { transactionApi } from "../../api/transaction.api";
 import { formatCurrency, formatDate } from "../../utils/format";
+import Skeleton from "../../components/ui/Skeleton";
 
 const serviceCategories = [
   {
@@ -45,13 +46,12 @@ export default function HomePage() {
   });
 
   const balance = balanceData?.data;
-  const transactions =
-    txData?.data.items.slice(0, 5) ?? [];
+  const transactions = txData?.data.items.slice(0, 5) ?? [];
 
   return (
     <div className="space-y-6 pb-24">
 
-      {/* BALANCE CARD */}
+      {/* ================= BALANCE CARD ================= */}
       <div className="relative overflow-hidden bg-brown rounded-[2rem] p-8 text-white shadow-2xl shadow-brown/20">
         <div className="absolute top-0 right-0 p-8 opacity-10">
           <span className="material-symbols-outlined !text-9xl">
@@ -75,20 +75,31 @@ export default function HomePage() {
             </button>
           </div>
 
-          <h3 className="text-3xl font-extrabold tracking-tight mt-2">
-            {balanceLoading
-              ? "Loading..."
-              : showBalance
-              ? formatCurrency(
-                  balance?.availableBalance ?? 0,
-                  balance?.currency
-                )
-              : "••••••••"}
-          </h3>
+          <div className="mt-3">
+            {balanceLoading ? (
+              <Skeleton className="h-10 w-40 bg-white/20" />
+            ) : (
+              <h3 className="text-3xl font-extrabold tracking-tight">
+                {showBalance
+                  ? formatCurrency(
+                      balance?.availableBalance ?? 0,
+                      balance?.currency
+                    )
+                  : "••••••••"}
+              </h3>
+            )}
+          </div>
+
+          <button className="mt-6 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-xs font-medium flex items-center gap-2 transition-all">
+            <span className="material-symbols-outlined !text-sm">
+              add_circle
+            </span>
+            Add Funds
+          </button>
         </div>
       </div>
 
-      {/* QUICK SERVICES */}
+      {/* ================= QUICK SERVICES ================= */}
       <section>
         <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
           <span className="w-1 h-5 bg-gold rounded-full"></span>
@@ -117,7 +128,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* RECENT TRANSACTIONS */}
+      {/* ================= RECENT TRANSACTIONS ================= */}
       <section>
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-bold flex items-center gap-2">
@@ -128,8 +139,26 @@ export default function HomePage() {
 
         <div className="bg-white rounded-2xl shadow-sm border border-brown/5 overflow-hidden">
           {txLoading ? (
-            <div className="p-6 text-sm text-text-muted">
-              Loading transactions...
+            <div className="divide-y divide-brown/5">
+              {[1, 2, 3, 4, 5].map((i) => (
+                <div
+                  key={i}
+                  className="px-6 py-4 flex items-center justify-between"
+                >
+                  <div className="flex items-center gap-3">
+                    <Skeleton className="size-8 rounded-full" />
+                    <div className="space-y-2">
+                      <Skeleton className="h-3 w-32" />
+                      <Skeleton className="h-2 w-24" />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2 text-right">
+                    <Skeleton className="h-3 w-16 ml-auto" />
+                    <Skeleton className="h-2 w-12 ml-auto" />
+                  </div>
+                </div>
+              ))}
             </div>
           ) : transactions.length === 0 ? (
             <div className="p-6 text-sm text-text-muted">
@@ -153,9 +182,7 @@ export default function HomePage() {
                             }`}
                           >
                             <span className="material-symbols-outlined !text-sm">
-                              {isCredit
-                                ? "add_circle"
-                                : "call_made"}
+                              {isCredit ? "add_circle" : "call_made"}
                             </span>
                           </div>
 
