@@ -1,4 +1,9 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { walletApi } from "../../api/wallet.api";
+import { transactionApi } from "../../api/transaction.api";
+import { formatCurrency, formatDate } from "../../utils/format";
+
 const serviceCategories = [
   {
     id: "data",
@@ -26,66 +31,22 @@ const serviceCategories = [
   },
 ];
 
-const transactions = [
-  {
-    id: 1,
-    title: "MTN Data Purchase",
-    icon: "cell_tower",
-    color: "bg-orange-100 text-orange-600",
-    amount: "-₦4,500.00",
-    amountColor: "text-red-600",
-    date: "Oct 24, 2023 • 09:12 AM",
-    status: "Successful",
-    statusColor: "bg-green-100 text-green-700",
-  },
-  {
-    id: 2,
-    title: "Wallet Funding",
-    icon: "add_circle",
-    color: "bg-brown/10 text-brown",
-    amount: "+₦50,000.00",
-    amountColor: "text-green-600",
-    date: "Oct 23, 2023 • 04:30 PM",
-    status: "Successful",
-    statusColor: "bg-green-100 text-green-700",
-  },
-  {
-    id: 3,
-    title: "DSTV Premium",
-    icon: "tv",
-    color: "bg-purple-100 text-purple-600",
-    amount: "-₦21,000.00",
-    amountColor: "text-red-600",
-    date: "Oct 22, 2023 • 11:45 AM",
-    status: "Successful",
-    statusColor: "bg-green-100 text-green-700",
-  },
-  {
-    id: 4,
-    title: "Airtel Airtime",
-    icon: "call",
-    color: "bg-blue-100 text-blue-600",
-    amount: "-₦1,000.00",
-    amountColor: "text-red-600",
-    date: "Oct 21, 2023 • 02:10 PM",
-    status: "Processing",
-    statusColor: "bg-yellow-100 text-yellow-700",
-  },
-  {
-    id: 5,
-    title: "Ikeja Electric",
-    icon: "bolt",
-    color: "bg-green-100 text-green-600",
-    amount: "-₦10,000.00",
-    amountColor: "text-red-600",
-    date: "Oct 20, 2023 • 08:00 AM",
-    status: "Successful",
-    statusColor: "bg-green-100 text-green-700",
-  },
-];
-
 export default function HomePage() {
   const [showBalance, setShowBalance] = useState(false);
+
+  const { data: balanceData, isLoading: balanceLoading } = useQuery({
+    queryKey: ["wallet-balance"],
+    queryFn: walletApi.getBalance,
+  });
+
+  const { data: txData, isLoading: txLoading } = useQuery({
+    queryKey: ["transactions-history"],
+    queryFn: transactionApi.getHistory,
+  });
+
+  const balance = balanceData?.data;
+  const transactions =
+    txData?.data.items.slice(0, 5) ?? [];
 
   return (
     <div className="space-y-6 pb-24">
@@ -106,7 +67,7 @@ export default function HomePage() {
 
             <button
               onClick={() => setShowBalance(!showBalance)}
-              className="text-white/70 hover:text-white transition-colors"
+              className="text-white/70 hover:text-white"
             >
               <span className="material-symbols-outlined text-sm">
                 {showBalance ? "visibility_off" : "visibility"}
@@ -115,15 +76,15 @@ export default function HomePage() {
           </div>
 
           <h3 className="text-3xl font-extrabold tracking-tight mt-2">
-            {showBalance ? "₦1,240,500.00" : "••••••••"}
+            {balanceLoading
+              ? "Loading..."
+              : showBalance
+              ? formatCurrency(
+                  balance?.availableBalance ?? 0,
+                  balance?.currency
+                )
+              : "••••••••"}
           </h3>
-
-          <button className="mt-4 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-xs font-medium flex items-center gap-2 transition-all">
-            <span className="material-symbols-outlined !text-sm">
-              add_circle
-            </span>
-            Add Funds
-          </button>
         </div>
       </div>
 
@@ -138,7 +99,7 @@ export default function HomePage() {
           {serviceCategories.map((service) => (
             <button
               key={service.id}
-              className="bg-white p-6 rounded-2xl shadow-sm border border-brown/5 flex flex-col items-center gap-3 hover:shadow-md hover:border-brown/20 transition-all group"
+              className="bg-white p-6 rounded-2xl shadow-sm border border-brown/5 flex flex-col items-center gap-3 hover:shadow-md transition-all group"
             >
               <div
                 className={`size-12 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform ${service.color}`}
@@ -156,7 +117,6 @@ export default function HomePage() {
         </div>
       </section>
 
-
       {/* RECENT TRANSACTIONS */}
       <section>
         <div className="flex items-center justify-between mb-4">
@@ -164,68 +124,80 @@ export default function HomePage() {
             <span className="w-1 h-5 bg-gold rounded-full"></span>
             Recent Transactions
           </h3>
-
-          <button className="text-sm font-semibold text-brown hover:underline">
-            View All
-          </button>
         </div>
 
         <div className="bg-white rounded-2xl shadow-sm border border-brown/5 overflow-hidden">
-          <table className="w-full text-left">
-            <thead className="bg-gray-50/50 border-b border-brown/5">
-              <tr>
-                <th className="px-6 py-4 text-xs font-bold uppercase text-text-muted tracking-wider">
-                  Transaction
-                </th>
-                <th className="hidden sm:table-cell px-6 py-4 text-xs font-bold uppercase text-text-muted tracking-wider">
-                  Date
-                </th>
-                <th className="px-6 py-4 text-xs font-bold uppercase text-text-muted tracking-wider">
-                  Amount
-                </th>
-                <th className="px-6 py-4 text-xs font-bold uppercase text-text-muted tracking-wider text-right">
-                  Status
-                </th>
-              </tr>
-            </thead>
+          {txLoading ? (
+            <div className="p-6 text-sm text-text-muted">
+              Loading transactions...
+            </div>
+          ) : transactions.length === 0 ? (
+            <div className="p-6 text-sm text-text-muted">
+              No transactions yet
+            </div>
+          ) : (
+            <table className="w-full text-left">
+              <tbody className="divide-y divide-brown/5">
+                {transactions.map((tx) => {
+                  const isCredit = tx.type === "credit";
 
-            <tbody className="divide-y divide-brown/5">
-              {transactions.map((tx) => (
-                <tr key={tx.id} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      <div className={`size-8 rounded-full flex items-center justify-center shrink-0 ${tx.color}`}>
-                        <span className="material-symbols-outlined !text-sm">
-                          {tx.icon}
+                  return (
+                    <tr key={tx.id}>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-3">
+                          <div
+                            className={`size-8 rounded-full flex items-center justify-center ${
+                              isCredit
+                                ? "bg-green-100 text-green-600"
+                                : "bg-orange-100 text-orange-600"
+                            }`}
+                          >
+                            <span className="material-symbols-outlined !text-sm">
+                              {isCredit
+                                ? "add_circle"
+                                : "call_made"}
+                            </span>
+                          </div>
+
+                          <div>
+                            <p className="text-sm font-bold">
+                              {tx.description}
+                            </p>
+                            <p className="text-[10px] text-text-muted">
+                              {formatDate(tx.createdAt)}
+                            </p>
+                          </div>
+                        </div>
+                      </td>
+
+                      <td
+                        className={`px-6 py-4 text-sm font-bold ${
+                          isCredit
+                            ? "text-green-600"
+                            : "text-red-600"
+                        }`}
+                      >
+                        {isCredit ? "+" : "-"}
+                        {formatCurrency(tx.amount)}
+                      </td>
+
+                      <td className="px-6 py-4 text-right">
+                        <span
+                          className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase ${
+                            tx.status === "Posted"
+                              ? "bg-green-100 text-green-700"
+                              : "bg-yellow-100 text-yellow-700"
+                          }`}
+                        >
+                          {tx.status}
                         </span>
-                      </div>
-
-                      <div>
-                        <p className="text-sm font-bold">{tx.title}</p>
-                        <p className="text-[10px] text-text-muted sm:hidden">
-                          {tx.date}
-                        </p>
-                      </div>
-                    </div>
-                  </td>
-
-                  <td className="hidden sm:table-cell px-6 py-4 text-sm text-text-muted">
-                    {tx.date}
-                  </td>
-
-                  <td className={`px-6 py-4 text-sm font-bold ${tx.amountColor}`}>
-                    {tx.amount}
-                  </td>
-
-                  <td className="px-6 py-4 text-right">
-                    <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase ${tx.statusColor}`}>
-                      {tx.status}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          )}
         </div>
       </section>
     </div>
