@@ -10,27 +10,10 @@ import ResetPasswordPage from "./pages/auth/ResetPasswordPage";
 import AppLayout from "./layouts/AppLayout";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import HomePage from "./pages/app/HomePage";
-import { useEffect } from "react";
-import { useAuthStore } from "./store/auth.store";
+import WalletPage from "./pages/wallet/WalletPage";
+import FundWalletPage from "./pages/wallet/FundWalletPage";
 
 export default function App() {
-  const hydrateAuth = useAuthStore((s) => s.hydrateAuth);
-  const isHydrated = useAuthStore((s) => s.isHydrated);
-
-  useEffect(() => {
-    hydrateAuth();
-  }, []);
-
-  if (!isHydrated) {
-    return (
-      <div className="h-screen flex items-center justify-center bg-milk">
-        <span className="text-brown font-semibold">
-          Loading...
-        </span>
-      </div>
-    );
-  }
-
   return (
     <BrowserRouter>
       <Routes>
@@ -39,7 +22,10 @@ export default function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/verify" element={<VerificationPage />} />
-        <Route path="/request-verification" element={<RequestVerificationPage />} />
+        <Route
+          path="/request-verification"
+          element={<RequestVerificationPage />}
+        />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
 
@@ -53,9 +39,8 @@ export default function App() {
           }
         >
           <Route index element={<HomePage />} />
-          {/* Future nested routes */}
-          {/* <Route path="wallet" element={<WalletPage />} /> */}
-          {/* <Route path="services" element={<ServicesPage />} /> */}
+          <Route path="wallet" element={<WalletPage />} />
+          <Route path="wallet/fund" element={<FundWalletPage />} />
         </Route>
       </Routes>
     </BrowserRouter>

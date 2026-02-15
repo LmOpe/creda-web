@@ -2,8 +2,9 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { walletApi } from "../../api/wallet.api";
 import { transactionApi } from "../../api/transaction.api";
-import { formatCurrency, formatDate } from "../../utils/format";
+import { formatCurrency } from "../../utils/format";
 import Skeleton from "../../components/ui/Skeleton";
+import TransactionHistory from "../../components/wallet/TransactionHistory";
 
 const serviceCategories = [
   {
@@ -46,17 +47,13 @@ export default function HomePage() {
   });
 
   const balance = balanceData?.data;
-  const transactions = txData?.data.items.slice(0, 5) ?? [];
 
   return (
     <div className="space-y-6 pb-24">
-
       {/* ================= BALANCE CARD ================= */}
       <div className="relative overflow-hidden bg-brown rounded-[2rem] p-8 text-white shadow-2xl shadow-brown/20">
         <div className="absolute top-0 right-0 p-8 opacity-10">
-          <span className="material-symbols-outlined !text-9xl">
-            payments
-          </span>
+          <span className="material-symbols-outlined !text-9xl">payments</span>
         </div>
 
         <div className="relative z-10">
@@ -83,7 +80,7 @@ export default function HomePage() {
                 {showBalance
                   ? formatCurrency(
                       balance?.availableBalance ?? 0,
-                      balance?.currency
+                      balance?.currency,
                     )
                   : "••••••••"}
               </h3>
@@ -130,102 +127,16 @@ export default function HomePage() {
 
       {/* ================= RECENT TRANSACTIONS ================= */}
       <section>
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-bold flex items-center gap-2">
-            <span className="w-1 h-5 bg-gold rounded-full"></span>
-            Recent Transactions
-          </h3>
-        </div>
+        <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
+          <span className="w-1 h-5 bg-gold rounded-full"></span>
+          Recent Transactions
+        </h3>
 
-        <div className="bg-white rounded-2xl shadow-sm border border-brown/5 overflow-hidden">
-          {txLoading ? (
-            <div className="divide-y divide-brown/5">
-              {[1, 2, 3, 4, 5].map((i) => (
-                <div
-                  key={i}
-                  className="px-6 py-4 flex items-center justify-between"
-                >
-                  <div className="flex items-center gap-3">
-                    <Skeleton className="size-8 rounded-full" />
-                    <div className="space-y-2">
-                      <Skeleton className="h-3 w-32" />
-                      <Skeleton className="h-2 w-24" />
-                    </div>
-                  </div>
-
-                  <div className="space-y-2 text-right">
-                    <Skeleton className="h-3 w-16 ml-auto" />
-                    <Skeleton className="h-2 w-12 ml-auto" />
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : transactions.length === 0 ? (
-            <div className="p-6 text-sm text-text-muted">
-              No transactions yet
-            </div>
-          ) : (
-            <table className="w-full text-left">
-              <tbody className="divide-y divide-brown/5">
-                {transactions.map((tx) => {
-                  const isCredit = tx.type === "credit";
-
-                  return (
-                    <tr key={tx.id}>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-3">
-                          <div
-                            className={`size-8 rounded-full flex items-center justify-center ${
-                              isCredit
-                                ? "bg-green-100 text-green-600"
-                                : "bg-orange-100 text-orange-600"
-                            }`}
-                          >
-                            <span className="material-symbols-outlined !text-sm">
-                              {isCredit ? "add_circle" : "call_made"}
-                            </span>
-                          </div>
-
-                          <div>
-                            <p className="text-sm font-bold">
-                              {tx.description}
-                            </p>
-                            <p className="text-[10px] text-text-muted">
-                              {formatDate(tx.createdAt)}
-                            </p>
-                          </div>
-                        </div>
-                      </td>
-
-                      <td
-                        className={`px-6 py-4 text-sm font-bold ${
-                          isCredit
-                            ? "text-green-600"
-                            : "text-red-600"
-                        }`}
-                      >
-                        {isCredit ? "+" : "-"}
-                        {formatCurrency(tx.amount)}
-                      </td>
-
-                      <td className="px-6 py-4 text-right">
-                        <span
-                          className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase ${
-                            tx.status === "Posted"
-                              ? "bg-green-100 text-green-700"
-                              : "bg-yellow-100 text-yellow-700"
-                          }`}
-                        >
-                          {tx.status}
-                        </span>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          )}
-        </div>
+        <TransactionHistory
+          transactions={txData?.data.items ?? []}
+          limit={5}
+          isLoading={txLoading}
+        />
       </section>
     </div>
   );
