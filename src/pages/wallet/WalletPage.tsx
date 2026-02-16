@@ -10,7 +10,7 @@ import { walletApi } from "../../api/wallet.api";
 export default function WalletPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [showBalance, setShowBalance] = useState(true);
+  const [showBalance, setShowBalance] = useState(false);
 
 const { data: balanceData} = useQuery({
   queryKey: ["wallet-balance"],

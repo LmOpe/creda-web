@@ -53,7 +53,7 @@ export default function TransactionHistory({
         return (
           <div
             key={tx.id}
-            className="glass-card rounded-2xl p-4 flex items-center justify-between group"
+            className="glass-card rounded-2xl p-2 flex items-center justify-between group"
           >
             <div className="flex items-center gap-4">
               <div
